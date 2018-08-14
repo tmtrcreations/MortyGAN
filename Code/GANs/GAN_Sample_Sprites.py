@@ -38,8 +38,8 @@ class GAN():
         self.img_shape = (self.img_rows, self.img_cols, self.channels)
         self.latent_dim = 100
 
-        optimizer_d = SGD(0.0008)
-        optimizer_g = Adam(0.99)
+        optimizer_d = SGD(0.001)
+        optimizer_g = Adam(0.002)
 
         # Build and compile the discriminator
         self.discriminator = self.build_discriminator()
@@ -74,14 +74,14 @@ class GAN():
 
         model = Sequential()
         
-        model.add(Dense(128 * 5 * 5, activation='relu', input_dim=self.latent_dim))
-        model.add(Reshape((5, 5, 128)))
-        model.add(UpSampling2D(4))
+        model.add(Dense(128 * 20 * 20, activation='relu', input_dim=self.latent_dim))
+        model.add(Reshape((20, 20, 128)))
+        model.add(UpSampling2D())
         
         model.add(Conv2D(64, kernel_size=3, strides=1, padding="same"))
         model.add(BatchNormalization(momentum=0.9))  
         model.add(Activation("relu"))
-        model.add(UpSampling2D(4))
+        model.add(UpSampling2D())
         
         model.add(Conv2D(32, kernel_size=3, strides=1, padding="same"))
         model.add(BatchNormalization(momentum=0.9))
@@ -107,19 +107,19 @@ class GAN():
         model = Sequential()
         
         model.add(Conv2D(32, (3, 3), padding='valid', input_shape=self.img_shape))
-        model.add(LeakyReLU(alpha=0.2))
         model.add(BatchNormalization(momentum=0.9))
+        model.add(LeakyReLU(alpha=0.2))
         model.add(AveragePooling2D((3, 3)))
         
         model.add(Conv2D(64, (3, 3), padding='valid'))
-        model.add(LeakyReLU(alpha=0.2))
         model.add(BatchNormalization(momentum=0.9))
+        model.add(LeakyReLU(alpha=0.2))
         model.add(AveragePooling2D((3, 3)))
         
-        model.add(Conv2D(128, (2, 2), padding='valid'))
-        model.add(LeakyReLU(alpha=0.2))
+        model.add(Conv2D(128, (3, 3), padding='valid'))
         model.add(BatchNormalization(momentum=0.9))
-        model.add(AveragePooling2D((2, 2)))
+        model.add(LeakyReLU(alpha=0.2))
+        model.add(AveragePooling2D((3, 3)))
         
         model.add(Flatten())
         model.add(Dense(512))
@@ -165,9 +165,7 @@ class GAN():
             idx = np.random.randint(0, X_train.shape[0], batch_size)
             imgs = X_train[idx]
             if epoch < 10000:
-                imgs = imgs + (0.85*(np.cos(np.pi*epoch/10000)+1)/2)*np.random.normal(0, 1, imgs.shape)
-                imgs = imgs - np.min(imgs)
-                imgs = imgs/np.max(imgs)
+                imgs = imgs + (0.5*(np.cos(np.pi*epoch/10000)+1)/2)*np.random.normal(0, 1, imgs.shape)
 
             noise = np.random.normal(0, 1, (batch_size, self.latent_dim))
 
@@ -183,9 +181,8 @@ class GAN():
             #  Train Generator
             # ---------------------
 
-            noise = np.random.normal(0, 1, (batch_size, self.latent_dim))
-
             # Train the generator (to have the discriminator label samples as valid)
+            noise = np.random.normal(0, 1, (batch_size, self.latent_dim))
             g_loss = self.combined.train_on_batch(noise, valid)
 
             # Plot the progress
@@ -223,4 +220,4 @@ class GAN():
         
 if __name__ == '__main__':
     gan = GAN()
-    gan.train(epochs=100000, batch_size=64, sample_interval=200)
+    gan.train(epochs=100000, batch_size=32, sample_interval=200)
