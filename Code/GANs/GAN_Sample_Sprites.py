@@ -17,6 +17,8 @@ from keras.layers.advanced_activations import LeakyReLU
 from keras.layers.convolutional import UpSampling2D, Conv2D
 from keras.models import Sequential, Model
 from keras.optimizers import Adam, SGD
+from keras.layers.noise import GaussianNoise
+from keras import backend as K
 from PIL import Image
 import numpy as np
 import matplotlib.pyplot as plt
@@ -37,8 +39,9 @@ class GAN():
         self.channels = 3
         self.img_shape = (self.img_rows, self.img_cols, self.channels)
         self.latent_dim = 100
+        self.stddev = K.variable(K.cast_to_floatx(10))
 
-        optimizer_d = SGD(0.001)
+        optimizer_d = SGD(0.002)
         optimizer_g = Adam(0.002)
 
         # Build and compile the discriminator
@@ -53,6 +56,7 @@ class GAN():
         # The generator takes noise as input and generates imgs
         z = Input(shape=(self.latent_dim,))
         img = self.generator(z)
+        img = GaussianNoise(stddev=self.stddev)(img)
 
         # For the combined model we will only train the generator
         validity = self.discriminator
@@ -164,8 +168,10 @@ class GAN():
             # Select a random batch of images
             idx = np.random.randint(0, X_train.shape[0], batch_size)
             imgs = X_train[idx]
-            if epoch < 10000:
-                imgs = imgs + (0.5*(np.cos(np.pi*epoch/10000)+1)/2)*np.random.normal(0, 1, imgs.shape)
+            if epoch < 100:
+                stddev = (10*(np.cos(np.pi*epoch/100)+1)/2)
+                K.set_value(self.stddev, K.cast_to_floatx(stddev))
+                imgs = imgs + np.random.normal(0, stddev, imgs.shape)
 
             noise = np.random.normal(0, 1, (batch_size, self.latent_dim))
 
