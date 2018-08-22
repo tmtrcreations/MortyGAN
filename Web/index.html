@@ -1,0 +1,43 @@
+<html>
+    <head>
+        <!-- Load TensorFlow.js -->
+        <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@latest"> </script>
+        
+        <!-- Place your code in the script tag below. You can also use an external .js file -->
+        <script>
+            // Notice there is no 'import' statement. 'tf' is available on the index-page
+            // because of the script tag above.
+            
+            // Define image generation function
+            function genImage(){
+                // Debug statement
+                console.log("Inside genImage");
+                // Load the model
+                const mod = tf.loadModel('https://tmtrcreations.com/assets/Aug21.json/model.json').then(function(model){
+                    // Debug statement
+                    console.log("Loaded model");
+                    // Create noise to generate a Morty image
+                    noise = tf.randomNormal([1, 100]);
+                    // Create the image
+                    img = model.predict(noise);
+                    // Debug statement
+                    console.log(img);
+                    tf.toPixels(img.as3D(160,160,3).add(1).div(2));
+                    console.log("Displayed")
+                    return(img)
+                });
+                return(mod);
+            }
+        
+            // Generate a new Morty image
+            const morty_image = genImage();
+            //console.log(morty_image)
+            
+        </script>
+    </head>
+    
+    <body>
+    </body>
+</html>
+
+
