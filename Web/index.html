@@ -13,7 +13,7 @@
                 // Debug statement
                 console.log("Inside genImage");
                 // Load the model
-                const mod = tf.loadModel('https://tmtrcreations.com/assets/Aug21.json/model.json').then(function(model){
+                tf.loadModel('https://tmtrcreations.com/assets/Aug21.json/model.json').then(function(model){
                     // Debug statement
                     console.log("Loaded model");
                     // Create noise to generate a Morty image
@@ -24,14 +24,11 @@
                     console.log(img);
                     tf.toPixels(img.as3D(160,160,3).add(1).div(2));
                     console.log("Displayed")
-                    return(img)
                 });
-                return(mod);
             }
         
             // Generate a new Morty image
-            const morty_image = genImage();
-            //console.log(morty_image)
+            genImage();
             
         </script>
     </head>
