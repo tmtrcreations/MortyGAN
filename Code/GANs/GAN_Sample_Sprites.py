@@ -19,6 +19,7 @@ from keras.models import Sequential, Model
 from keras.optimizers import Adam, SGD
 from keras.layers.noise import GaussianNoise
 from keras import backend as K
+import tensorflowjs as tfjs
 from PIL import Image
 import numpy as np
 import matplotlib.pyplot as plt
@@ -197,6 +198,10 @@ class GAN():
             # If at save interval => save generated image samples
             if epoch % sample_interval == 0:
                 self.sample_images(epoch)
+                
+            if epoch % 1000 == 0:
+                gan.generator.save("../../Trained_Models/Aug21_e" + str(epoch) + ".h5")
+                tfjs.converters.save_keras_model(gan.generator, "../../Trained_Models/Aug21_e" + str(epoch) + ".json")
 
     # --------------------------
     #  Define Sample Generation 
@@ -227,3 +232,5 @@ class GAN():
 if __name__ == '__main__':
     gan = GAN()
     gan.train(epochs=100000, batch_size=32, sample_interval=200)
+    gan.generator.save("../../Trained_Models/Aug21.h5")
+    tfjs.converters.save_keras_model(gan.generator, "../../Trained_Models/Aug21.json")

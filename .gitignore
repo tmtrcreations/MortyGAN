@@ -3,3 +3,5 @@
 *.png
 !Morty001.png
 log.txt
+Trained_Models/Aug21_*
+!Trained_Models/Aug21.json
